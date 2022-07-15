@@ -3,7 +3,6 @@
 namespace Laravel\Fortify;
 
 use Illuminate\Contracts\Auth\StatefulGuard;
-use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -21,7 +20,6 @@ use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
 use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse as SuccessfulPasswordResetLinkRequestResponseContract;
 use Laravel\Fortify\Contracts\TwoFactorAuthenticationProvider as TwoFactorAuthenticationProviderContract;
 use Laravel\Fortify\Contracts\TwoFactorLoginResponse as TwoFactorLoginResponseContract;
-use Laravel\Fortify\Contracts\VerifyEmailResponse as VerifyEmailResponseContract;
 use Laravel\Fortify\Http\Responses\FailedPasswordConfirmationResponse;
 use Laravel\Fortify\Http\Responses\FailedPasswordResetLinkRequestResponse;
 use Laravel\Fortify\Http\Responses\FailedPasswordResetResponse;
@@ -35,8 +33,6 @@ use Laravel\Fortify\Http\Responses\PasswordUpdateResponse;
 use Laravel\Fortify\Http\Responses\RegisterResponse;
 use Laravel\Fortify\Http\Responses\SuccessfulPasswordResetLinkRequestResponse;
 use Laravel\Fortify\Http\Responses\TwoFactorLoginResponse;
-use Laravel\Fortify\Http\Responses\VerifyEmailResponse;
-use PragmaRX\Google2FA\Google2FA;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -51,12 +47,10 @@ class FortifyServiceProvider extends ServiceProvider
 
         $this->registerResponseBindings();
 
-        $this->app->singleton(TwoFactorAuthenticationProviderContract::class, function ($app) {
-            return new TwoFactorAuthenticationProvider(
-                $app->make(Google2FA::class),
-                $app->make(Repository::class)
-            );
-        });
+        $this->app->singleton(
+            TwoFactorAuthenticationProviderContract::class,
+            TwoFactorAuthenticationProvider::class
+        );
 
         $this->app->bind(StatefulGuard::class, function () {
             return Auth::guard(config('fortify.guard', null));
@@ -83,7 +77,6 @@ class FortifyServiceProvider extends ServiceProvider
         $this->app->singleton(PasswordUpdateResponseContract::class, PasswordUpdateResponse::class);
         $this->app->singleton(RegisterResponseContract::class, RegisterResponse::class);
         $this->app->singleton(SuccessfulPasswordResetLinkRequestResponseContract::class, SuccessfulPasswordResetLinkRequestResponse::class);
-        $this->app->singleton(VerifyEmailResponseContract::class, VerifyEmailResponse::class);
     }
 
     /**

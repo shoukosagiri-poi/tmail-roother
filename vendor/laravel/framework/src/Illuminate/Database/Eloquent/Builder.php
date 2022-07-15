@@ -7,6 +7,7 @@ use Closure;
 use Exception;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Concerns\BuildsQueries;
+use Illuminate\Database\Concerns\ExplainsQueries;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -25,7 +26,7 @@ use ReflectionMethod;
  */
 class Builder
 {
-    use Concerns\QueriesRelationships, ForwardsCalls;
+    use Concerns\QueriesRelationships, ExplainsQueries, ForwardsCalls;
     use BuildsQueries {
         sole as baseSole;
     }
@@ -95,7 +96,6 @@ class Builder
         'doesntExist',
         'dump',
         'exists',
-        'explain',
         'getBindings',
         'getConnection',
         'getGrammar',
@@ -865,7 +865,9 @@ class Builder
      */
     protected function ensureOrderForCursorPagination($shouldReverse = false)
     {
-        if (empty($this->query->orders) && empty($this->query->unionOrders)) {
+        $orders = collect($this->query->orders);
+
+        if ($orders->count() === 0) {
             $this->enforceOrderBy();
         }
 
@@ -875,10 +877,6 @@ class Builder
 
                 return $order;
             })->toArray();
-        }
-
-        if ($this->query->unionOrders) {
-            return collect($this->query->unionOrders);
         }
 
         return collect($this->query->orders);
@@ -1004,7 +1002,7 @@ class Builder
 
         $qualifiedColumn = end($segments).'.'.$column;
 
-        $values[$qualifiedColumn] = Arr::get($values, $qualifiedColumn, $values[$column]);
+        $values[$qualifiedColumn] = $values[$column];
 
         unset($values[$column]);
 

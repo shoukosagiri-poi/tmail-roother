@@ -218,7 +218,6 @@ cg-eye
 changedetection
 ChangesMeter
 Charlotte
-chatterino-api-cache
 CheckHost
 checkprivacy
 CherryPicker

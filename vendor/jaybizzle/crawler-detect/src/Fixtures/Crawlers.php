@@ -239,7 +239,6 @@ class Crawlers extends AbstractProvider
         'changedetection',
         'ChangesMeter',
         'Charlotte',
-        'chatterino-api-cache',
         'CheckHost',
         'checkprivacy',
         'CherryPicker',
